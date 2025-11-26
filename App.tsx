@@ -7,7 +7,7 @@ import { Printer, Download, Image as ImageIcon } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 const INITIAL_DATA: CertificateData = {
-  companyName: "SMART",
+  companyName: "STE",
   recipientName: "Employee Name",
   title: "CERTIFICATE",
   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
@@ -16,9 +16,11 @@ const INITIAL_DATA: CertificateData = {
   issuerTitle: "Project Director",
   signatureText: "Sarah Connor",
   theme: CertificateTheme.SMART_WAVE,
-  logoWidth: 150,
-  logoTop: 12,
-  logoLeft: 80,
+  logoWidth: 139,
+  logoTop: 4,
+  logoLeft: 46,
+  logoOpacity: 100,
+  recipientFont: 'sans',
 };
 
 const App: React.FC = () => {

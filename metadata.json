@@ -1,5 +1,5 @@
 {
-  "name": "CertiGen AI",
+  "name": "Taha CertiGen AI",
   "description": "An intelligent certificate generator powered by Gemini. Create professional certificates instantly by describing the occasion or manually editing the details. Features print-ready export and customizable templates.",
   "requestFramePermissions": []
 }

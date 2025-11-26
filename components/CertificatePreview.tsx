@@ -8,6 +8,24 @@ interface Props {
 
 const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
   
+  // Helper to determine recipient font class and size adjustment
+  const getRecipientStyle = () => {
+    const font = data.recipientFont || 'sans';
+    switch (font) {
+      case 'script':
+        return { className: 'font-script', sizeClass: 'text-8xl' };
+      case 'serif':
+        return { className: 'font-serif', sizeClass: 'text-7xl' };
+      case 'display':
+        return { className: 'font-display', sizeClass: 'text-6xl tracking-widest' };
+      case 'sans':
+      default:
+        return { className: 'font-sans font-bold', sizeClass: 'text-7xl tracking-tight' };
+    }
+  };
+
+  const recipientStyle = getRecipientStyle();
+
   // Classic Theme Component
   const ClassicTheme = () => (
     <div className="w-full h-full bg-white relative p-8 flex flex-col items-center justify-between border-[20px] border-double border-gold-600 shadow-2xl overflow-hidden text-center text-slate-800">
@@ -31,7 +49,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
 
       {/* Recipient */}
       <div className="z-10 w-full py-4">
-        <h2 className="font-script text-7xl text-gold-700 px-4 py-2 border-b-2 border-slate-100 inline-block min-w-[50%]">
+        <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-gold-700 px-4 py-2 border-b-2 border-slate-100 inline-block min-w-[50%]`}>
           {data.recipientName || "Recipient Name"}
         </h2>
       </div>
@@ -97,7 +115,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
       <div className="w-2/3 h-full p-12 flex flex-col justify-center relative bg-slate-50 text-slate-900">
          <div className="flex-1 flex flex-col justify-center">
             <h3 className="uppercase tracking-[0.2em] text-gold-600 font-bold text-sm mb-4">Presented To</h3>
-            <h2 className="font-sans font-bold text-6xl text-slate-900 mb-6">{data.recipientName || "Recipient Name"}</h2>
+            <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-slate-900 mb-6`}>{data.recipientName || "Recipient Name"}</h2>
             
             <h3 className="uppercase tracking-[0.2em] text-gold-600 font-bold text-sm mb-4">For</h3>
             <h1 className="font-serif text-3xl text-slate-800 font-bold mb-4">{data.title}</h1>
@@ -134,7 +152,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
 
       <div className="mb-12">
         <p className="font-sans text-slate-500 text-lg mb-2">Presented to</p>
-        <h2 className="font-sans font-light text-6xl text-black">{data.recipientName || "Recipient Name"}</h2>
+        <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-black font-light`}>{data.recipientName || "Recipient Name"}</h2>
       </div>
 
       <div className="mb-16 max-w-2xl">
@@ -161,42 +179,43 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
   const SmartWaveTheme = () => (
     <div className="w-full h-full bg-white relative flex overflow-hidden">
       {/* Outer Border */}
-      <div className="absolute inset-6 border-[3px] border-slate-900 z-20 pointer-events-none"></div>
+      <div className="absolute inset-6 border-[3px] border-[#003366] z-20 pointer-events-none"></div>
 
       {/* SVG Wave Graphic - Left Side */}
       <div className="absolute top-0 left-0 w-[45%] h-full z-10 pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 500 800" preserveAspectRatio="none">
           <defs>
              <linearGradient id="waveGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{stopColor:'#00a2e8', stopOpacity:1}} /> {/* Cyan */}
-                <stop offset="100%" style={{stopColor:'#0056b3', stopOpacity:1}} /> {/* Blue */}
+                {/* Matches the lighter cyan logo part */}
+                <stop offset="0%" style={{stopColor:'#00a2e8', stopOpacity:1}} /> 
+                <stop offset="100%" style={{stopColor:'#008bc5', stopOpacity:1}} />
              </linearGradient>
              <linearGradient id="waveGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{stopColor:'#0077c8', stopOpacity:1}} />
+                {/* Matches the darker navy logo part */}
+                <stop offset="0%" style={{stopColor:'#004b8d', stopOpacity:1}} />
                 <stop offset="100%" style={{stopColor:'#003366', stopOpacity:1}} />
              </linearGradient>
              <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-               <feDropShadow dx="5" dy="5" stdDeviation="5" floodOpacity="0.3"/>
+               <feDropShadow dx="4" dy="4" stdDeviation="4" floodOpacity="0.3"/>
              </filter>
           </defs>
           
-          {/* Top segment */}
+          {/* Top segment - Ribbon start */}
           <path 
-            d="M0 0 L250 0 C300 0 350 150 200 250 C120 300 50 220 50 150 Z" 
+            d="M0 0 L220 0 C280 0 320 80 250 180 C210 240 100 220 100 220 L0 180 Z" 
             fill="url(#waveGradient1)" 
-            filter="url(#dropShadow)"
           />
           
-          {/* Middle dark connector/shadow simulation */}
+          {/* Middle dark connector (fold) */}
           <path 
-             d="M0 200 L100 250 L200 450 L0 500 Z"
+             d="M100 220 L250 180 L220 400 L80 440 Z"
              fill="#002244"
              opacity="0.9"
           />
 
           {/* Large bottom swoosh */}
           <path 
-             d="M0 800 L350 800 C450 700 250 400 100 450 C50 470 0 500 0 500 Z"
+             d="M80 440 L220 400 C300 380 400 600 300 800 L0 800 Z"
              fill="url(#waveGradient2)"
              filter="url(#dropShadow)"
           />
@@ -207,9 +226,11 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
       <div className="relative z-30 w-full h-full flex flex-col px-16 py-12">
         
         {/* Logo Area */}
-        <div className="flex justify-center mb-8 pl-20">
+        {/* We keep this in the DOM but make it invisible if a custom logo is loaded, 
+            so the layout spacing remains identical but the text doesn't overlap the custom logo. */}
+        <div className={`flex justify-center mb-8 pl-20 ${data.logoImage ? 'invisible' : ''}`}>
            <div className="flex items-center gap-3">
-             <div className="w-14 h-14">
+             <div className="w-10 h-10">
                 {/* Custom S Logo */}
                 <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
                    <path d="M20 20 H70 L55 50 H20 L35 20 Z" fill="#00a2e8" />
@@ -217,18 +238,17 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
                 </svg>
              </div>
              <div>
-                <h2 className="font-sans font-extrabold text-4xl text-slate-800 tracking-widest uppercase leading-none">
+                <h2 className="font-sans font-extrabold text-4xl text-[#003366] tracking-widest uppercase leading-none">
                   {data.companyName || "SMART"}
                 </h2>
-                <p className="font-serif italic text-xs text-slate-500 tracking-wide text-right">Certificate Generator</p>
              </div>
            </div>
         </div>
 
         {/* Title */}
         <div className="text-center mt-4 mb-8 pl-10">
-           <h1 className="font-sans font-bold text-6xl text-[#002244] uppercase tracking-wide mb-2">{data.title}</h1>
-           <p className="font-sans text-2xl text-slate-600 font-light tracking-widest uppercase">of appreciation</p>
+           <h1 className="font-sans font-bold text-6xl text-[#003366] uppercase tracking-wide mb-2">{data.title}</h1>
+           <p className="font-serif italic text-3xl text-[#003366] font-bold">of appreciation</p>
         </div>
 
         {/* Presented To */}
@@ -240,7 +260,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
 
         {/* Recipient Name */}
         <div className="text-center mb-8 pl-10 relative">
-           <h2 className="font-script text-8xl text-[#003366] drop-shadow-sm p-4">
+           <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-[#003366] drop-shadow-sm p-4`}>
              {data.recipientName}
            </h2>
         </div>
@@ -251,7 +271,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
              {data.description}
            </p>
            {/* Date embedded below description slightly */}
-           <p className="mt-4 text-slate-500 font-medium">{data.date}</p>
+           <p className="mt-6 text-slate-500 font-medium italic">Given on {data.date}</p>
         </div>
 
         {/* Footer / Signatures */}
@@ -265,7 +285,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
            {/* Right Signature Line */}
            <div className="flex flex-col items-center">
               {/* Fake signature graphic if text provided, or use the font */}
-              <div className="font-script text-3xl text-[#002244] mb-[-10px] transform -rotate-2">{data.signatureText}</div>
+              <div className="font-script text-3xl text-[#003366] mb-[-10px] transform -rotate-2">{data.signatureText}</div>
               <div className="w-64 border-b border-slate-800 mb-2 mt-4"></div>
               <p className="font-sans font-bold text-slate-800 uppercase text-sm tracking-wider">{data.issuerTitle}</p>
            </div>
@@ -275,12 +295,107 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
     </div>
   );
 
+  // White Theme Component (NEW)
+  const WhiteTheme = () => (
+    <div className="w-full h-full bg-white relative p-16 flex flex-col items-center text-center border-[1px] border-slate-200">
+       <div className="w-full h-full border-4 border-slate-800 flex flex-col items-center justify-center p-12">
+          {data.companyName && (
+             <div className="font-sans font-bold text-xl uppercase tracking-[0.3em] text-slate-400 mb-8">
+               {data.companyName}
+             </div>
+          )}
+          <h1 className="font-serif text-6xl text-slate-900 mb-6">{data.title}</h1>
+          <div className="w-24 h-1 bg-slate-900 mb-8"></div>
+          
+          <p className="font-sans text-lg text-slate-500 uppercase tracking-widest mb-4">Presented to</p>
+          <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-slate-900 mb-8`}>
+            {data.recipientName}
+          </h2>
+
+          <p className="font-serif text-xl text-slate-600 max-w-2xl leading-relaxed mb-12">
+            {data.description}
+          </p>
+
+          <div className="w-full flex justify-between items-end px-20 mt-auto">
+             <div className="text-center">
+                <p className="font-sans font-bold text-slate-900 mb-2">{data.date}</p>
+                <div className="w-48 h-[1px] bg-slate-300 mx-auto mb-2"></div>
+                <p className="text-xs uppercase tracking-widest text-slate-400">Date</p>
+             </div>
+             
+             <div className="text-center">
+                <div className="font-script text-3xl text-slate-900 mb-2">{data.signatureText}</div>
+                <div className="w-48 h-[1px] bg-slate-300 mx-auto mb-2"></div>
+                <p className="font-sans font-bold text-sm uppercase text-slate-900">{data.issuerName}</p>
+                <p className="text-xs uppercase tracking-widest text-slate-400">{data.issuerTitle}</p>
+             </div>
+          </div>
+       </div>
+    </div>
+  );
+
+  // Silk Ribbon Theme Component (NEW)
+  const SilkRibbonTheme = () => (
+    <div className="w-full h-full bg-white relative flex flex-col overflow-hidden">
+      {/* Top Ribbon */}
+      <div className="h-4 bg-[#003366] w-full"></div>
+      <div className="h-24 bg-[#00a2e8] w-full relative flex items-center justify-center shadow-md">
+         <h1 className="text-white font-sans font-black text-5xl uppercase tracking-widest drop-shadow-md">
+           {data.title}
+         </h1>
+      </div>
+      <div className="h-2 bg-[#003366] w-full mb-12"></div>
+
+      <div className="flex-1 flex flex-col items-center px-16 text-center">
+         {data.companyName && (
+           <div className="font-sans font-bold text-2xl text-[#003366] mb-8 flex items-center gap-2">
+             <Award className="w-8 h-8" />
+             {data.companyName}
+           </div>
+         )}
+
+         <p className="font-serif italic text-2xl text-slate-500 mb-6">This is to certify that</p>
+         
+         <div className="relative mb-8">
+            <h2 className={`${recipientStyle.className} ${recipientStyle.sizeClass} text-[#003366] border-b-4 border-[#00a2e8] pb-2 px-8`}>
+              {data.recipientName}
+            </h2>
+         </div>
+
+         <p className="font-sans text-lg text-slate-600 max-w-3xl leading-relaxed mb-12">
+           {data.description}
+         </p>
+
+         <div className="w-full flex justify-around mt-auto mb-16">
+            <div className="flex flex-col items-center">
+               <div className="w-16 h-16 bg-[#00a2e8] rounded-full flex items-center justify-center text-white mb-4">
+                 <Star className="w-8 h-8 fill-current" />
+               </div>
+               <p className="font-bold text-[#003366]">{data.date}</p>
+            </div>
+
+            <div className="flex flex-col items-center justify-end">
+               <div className="font-script text-4xl text-[#003366] mb-2">{data.signatureText}</div>
+               <div className="w-64 border-b-2 border-[#00a2e8] mb-2"></div>
+               <p className="font-bold text-[#003366] uppercase text-sm">{data.issuerName}</p>
+               <p className="text-xs text-slate-500 uppercase tracking-widest">{data.issuerTitle}</p>
+            </div>
+         </div>
+      </div>
+      
+      {/* Bottom accent */}
+      <div className="h-4 bg-[#003366] w-full mt-auto"></div>
+    </div>
+  );
+
   return (
     <div ref={ref} className="w-[1123px] h-[794px] bg-white shadow-2xl overflow-hidden relative">
        {data.theme === CertificateTheme.CLASSIC && <ClassicTheme />}
        {data.theme === CertificateTheme.MODERN && <ModernTheme />}
        {data.theme === CertificateTheme.MINIMAL && <MinimalTheme />}
        {data.theme === CertificateTheme.SMART_WAVE && <SmartWaveTheme />}
+       {data.theme === CertificateTheme.WHITE && <WhiteTheme />}
+       {data.theme === CertificateTheme.SILK_RIBBON && <SilkRibbonTheme />}
        
        {/* User Uploaded Logo Layer */}
        {data.logoImage && (
@@ -292,6 +407,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => 
              width: `${data.logoWidth}px`,
              top: `${data.logoTop}%`,
              left: `${data.logoLeft}%`,
+             opacity: (data.logoOpacity ?? 100) / 100,
            }}
          />
        )}

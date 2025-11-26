@@ -12,6 +12,11 @@ export interface CertificateData {
   logoWidth: number;
   logoTop: number;
   logoLeft: number;
+  logoOpacity?: number;
+  recipientFont?: 'sans' | 'serif' | 'script' | 'display';
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
 }
 
 export enum CertificateTheme {
@@ -19,6 +24,8 @@ export enum CertificateTheme {
   MODERN = 'MODERN',
   MINIMAL = 'MINIMAL',
   SMART_WAVE = 'SMART_WAVE',
+  WHITE = 'WHITE',
+  SILK_RIBBON = 'SILK_RIBBON',
 }
 
 export interface AiExtractionResponse {
@@ -29,4 +36,15 @@ export interface AiExtractionResponse {
   issuerName?: string;
   issuerTitle?: string;
   companyName?: string;
+}
+
+declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+
+  interface Window {
+    aistudio?: AIStudio;
+  }
 }

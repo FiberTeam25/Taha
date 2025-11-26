@@ -1,10 +1,9 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AiExtractionResponse } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const extractCertificateDetails = async (prompt: string): Promise<AiExtractionResponse> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const responseSchema: Schema = {
       type: Type.OBJECT,
       properties: {
@@ -35,6 +34,45 @@ export const extractCertificateDetails = async (prompt: string): Promise<AiExtra
     return JSON.parse(text) as AiExtractionResponse;
   } catch (error) {
     console.error("Gemini extraction failed:", error);
+    throw error;
+  }
+};
+
+export const generateCertificateLogo = async (prompt: string, size: '1K' | '2K' | '4K'): Promise<string> => {
+  try {
+    // Ensure API Key is selected for Veo/Image models
+    if (typeof window !== 'undefined' && window.aistudio) {
+      const hasKey = await window.aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        await window.aistudio.openSelectKey();
+      }
+    }
+
+    // Create a new instance to ensure the latest API key is used
+    const imageAi = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    const response = await imageAi.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: {
+        parts: [{ text: prompt }]
+      },
+      config: {
+        imageConfig: {
+          imageSize: size,
+          aspectRatio: '1:1', // Logos are typically square
+        }
+      }
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
+    }
+    
+    throw new Error("No image data returned from API");
+  } catch (error) {
+    console.error("Image generation failed:", error);
     throw error;
   }
 };
