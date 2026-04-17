@@ -1,141 +1,82 @@
-import React, { useState, useRef } from 'react';
-import CertificatePreview from './components/CertificatePreview';
-import InputForm from './components/InputForm';
-import MagicBar from './components/MagicBar';
-import { CertificateData, CertificateTheme } from './types';
-import { Printer, Download, Image as ImageIcon } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import React, { useState, useCallback } from 'react';
+import { AppData, View } from './types';
+import { loadData, saveData } from './store';
+import Layout from './components/Layout';
+import Dashboard from './components/Dashboard';
+import ProjectForm from './components/ProjectForm';
+import TrenchingPage from './components/TrenchingPage';
+import DuctPage from './components/DuctPage';
+import CablePage from './components/CablePage';
+import BoxesPage from './components/BoxesPage';
+import SplicingPage from './components/SplicingPage';
+import ReportsPage from './components/ReportsPage';
 
-const INITIAL_DATA: CertificateData = {
-  companyName: "STE",
-  recipientName: "Employee Name",
-  title: "CERTIFICATE",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-  date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-  issuerName: "Country Manager",
-  issuerTitle: "Project Director",
-  signatureText: "Sarah Connor",
-  theme: CertificateTheme.SMART_WAVE,
-  logoWidth: 139,
-  logoTop: 4,
-  logoLeft: 46,
-  logoOpacity: 100,
-  recipientFont: 'sans',
-};
+export default function App() {
+  const [data, setData] = useState<AppData>(() => loadData());
+  const [view, setView] = useState<View>('dashboard');
 
-const App: React.FC = () => {
-  const [data, setData] = useState<CertificateData>(INITIAL_DATA);
-  const printRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
+  const update = useCallback((updater: (prev: AppData) => AppData) => {
+    setData(prev => {
+      const next = updater(prev);
+      saveData(next);
+      return next;
+    });
+  }, []);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const activeProject = data.projects.find(p => p.id === data.activeProjectId) ?? null;
 
-  const handleDownloadPNG = async () => {
-    if (!exportRef.current) return;
-    setIsExporting(true);
-    try {
-      const canvas = await html2canvas(exportRef.current, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true, // Attempt to handle cross-origin images if any
-        backgroundColor: '#ffffff',
-      });
-      
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `certificate-${data.recipientName.replace(/\s+/g, '-').toLowerCase()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export image.");
-    } finally {
-      setIsExporting(false);
+  const renderView = () => {
+    if (!data.activeProjectId && view !== 'project') {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center py-24">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">No Project Selected</h2>
+          <p className="text-gray-500 mb-6">Create or select a project to start collecting FTTH network data.</p>
+          <button
+            onClick={() => setView('project')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Create Project
+          </button>
+        </div>
+      );
+    }
+
+    switch (view) {
+      case 'dashboard':
+        return <Dashboard data={data} onNavigate={setView} />;
+      case 'project':
+        return <ProjectForm data={data} onUpdate={update} onNavigate={setView} />;
+      case 'trenching':
+        return <TrenchingPage data={data} onUpdate={update} />;
+      case 'ducts':
+        return <DuctPage data={data} onUpdate={update} />;
+      case 'cables':
+        return <CablePage data={data} onUpdate={update} />;
+      case 'boxes':
+        return <BoxesPage data={data} onUpdate={update} />;
+      case 'splicing':
+        return <SplicingPage data={data} onUpdate={update} />;
+      case 'reports':
+        return <ReportsPage data={data} />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50">
-      
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-600 rounded-lg p-1.5">
-              <Printer className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-xl tracking-tight text-slate-900">CertiGen AI</span>
-          </div>
-          <div className="flex items-center gap-3">
-             <button 
-               onClick={handleDownloadPNG}
-               disabled={isExporting}
-               className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 border border-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
-             >
-               {isExporting ? <span className="animate-spin">⌛</span> : <ImageIcon className="w-4 h-4" />}
-               Download PNG
-             </button>
-             <button 
-               onClick={handlePrint}
-               className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
-             >
-               <Printer className="w-4 h-4" /> Print / PDF
-             </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 no-print">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Left Column: Controls */}
-          <div className="w-full lg:w-[400px] flex-shrink-0 space-y-6">
-            <div>
-               <h2 className="text-lg font-bold text-slate-800 mb-2">AI Magic Fill</h2>
-               <p className="text-sm text-slate-500 mb-4">Type a description and let AI fill in the details for you.</p>
-               <MagicBar currentData={data} onUpdate={setData} />
-            </div>
-
-            <div className="border-t border-slate-200 pt-6">
-              <h2 className="text-lg font-bold text-slate-800 mb-4">Certificate Details</h2>
-              <InputForm data={data} onChange={setData} />
-            </div>
-          </div>
-
-          {/* Right Column: Preview */}
-          <div className="flex-1 bg-slate-100 rounded-2xl border border-slate-200 p-4 lg:p-12 flex flex-col items-center justify-start overflow-hidden relative">
-             <div className="mb-4 flex items-center gap-2 text-slate-400 text-sm font-medium z-10">
-               <span className="w-2 h-2 rounded-full bg-green-500"></span> Live Preview
-             </div>
-             
-             {/* 
-               Preview Container:
-               We scale this using CSS transform to fit in the UI.
-               The base size is 1123px x 794px (A4 Landscape at ~96 DPI).
-             */}
-             <div className="relative shadow-2xl origin-top-left transform scale-[0.4] sm:scale-[0.5] md:scale-[0.6] lg:scale-[0.7] xl:scale-[0.8] 2xl:scale-100 transition-all duration-300">
-               <CertificatePreview data={data} />
-             </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Print View - Hidden normally, shown when printing */}
-      <div className="print-only hidden">
-         <CertificatePreview ref={printRef} data={data} />
-      </div>
-
-      {/* Export View - Off-screen container for high-res PNG capture */}
-      <div style={{ position: 'fixed', top: 0, left: '-9999px', opacity: 0, pointerEvents: 'none' }}>
-        <CertificatePreview ref={exportRef} data={data} />
-      </div>
-
-    </div>
+    <Layout
+      view={view}
+      onNavigate={setView}
+      activeProject={activeProject}
+      data={data}
+      onUpdate={update}
+    >
+      {renderView()}
+    </Layout>
   );
-};
-
-export default App;
+}
